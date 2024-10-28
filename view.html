@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Teleprompter</title>
+    <style>
+        /* Basic styling for the teleprompter */
+        body {
+            background-color: black;
+            /* Default background */
+            color: white;
+            /* Default font color */
+            margin: 0;
+            overflow: hidden;
+            /* Prevent body scroll */
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+            /* Default font family */
+            height: 100vh;
+            /* Full height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.5s;
+            /* Smooth transition for background change */
+        }
+
+        #content {
+            white-space: pre-wrap;
+            line-height: 1;
+            text-align: center;
+            max-width: 1500px;
+            height: 100%;
+            overflow-y: auto;
+            letter-spacing: 5px;
+            outline: none;
+            /* border: 5px solid white; */
+            transition: border 0.3s;
+        }
+
+
+        /* Hide scrollbar for WebKit browsers */
+        #content::-webkit-scrollbar {
+            width: 0;
+            /* Remove width */
+            background: transparent;
+            /* Background transparent */
+        }
+
+        /* Hide scrollbar for Firefox */
+        #content {
+            scrollbar-width: thin;
+            /* Make it thin */
+            scrollbar-color: transparent transparent;
+            /* Background transparent */
+        }
+
+        /* Class for background image */
+        .bg-image {
+            background-image: url('lyricsBg.png');
+            /* Path to your background image */
+            background-size: cover;
+            /* Cover the entire body */
+            background-position: center;
+            /* Center the image */
+        }
+
+        /* Modal styles */
+        #fontModal {
+            display: none;
+            position: fixed;
+            z-index: 2;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            color: black;
+        }
+
+        /* Modal styles */
+        #myModal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+            color: black;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+        }
+
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Slider styles */
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="content" contenteditable="false"></div>
+
+
+    <!-- The Modal -->
+    <div id="myModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Keyboard Shortcuts</h2>
+            <ul>
+                <li><strong>Space Bar</strong>: Play/Pause scrolling</li>
+                <li><strong>1 - 9</strong>: Set scroll speed</li>
+                <li><strong>[</strong>: Zoom out</li>
+                <li><strong>]</strong>: Zoom in</li>
+                <li><strong>Escape</strong>: Scroll to top</li>
+                <li><strong>Arrow Up</strong>: Manual scroll up</li>
+                <li><strong>Arrow Down</strong>: Manual scroll down</li>
+                <li><strong>F2</strong>: Toggle text editing</li>
+                <li><strong>1</strong>: Change font color to yellow (in editing mode)</li>
+                <li><strong>2</strong>: Change font color to light blue (in editing mode)</li>
+                <li><strong>P</strong>: Change background to `lyricsBg.png`</li>
+            </ul>
+        </div>
+    </div>
+    <div id="fontModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeFontModal()">&times;</span>
+            <h2>Font Settings</h2>
+            <div>
+                <label for="maxWidthSlider">Max Width: <span id="maxWidthValue">1500</span>px</label>
+                <input type="range" id="maxWidthSlider" min="800" max="2000" value="1500" step="10">
+            </div>
+            <br><br>
+            <!-- <label for="fontWeight">Font Weight:</label>
+            <select id="fontWeight">
+                <option value="normal">Normal</option>
+                <option value="bold">Bold</option>
+                <option value="bolder">Bolder</option>
+                <option value="lighter">Lighter</option>
+            </select>
+            <br><br> -->
+            <!-- <label for="fontStyle">Font Style:</label>
+            <select id="fontStyle">
+                <option value="normal">Normal</option>
+                <option value="italic">Italic</option>
+                <option value="oblique">Oblique</option>
+            </select> -->
+            <!-- <br><br>
+            <button onclick="applyFontSettings()">Apply</button> -->
+        </div>
+    </div>
+
+    </div>
+    <script>
+        // Function to escape HTML characters (equivalent to htmlspecialchars in PHP)
+        function escapeHtml(html) {
+            return html.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Initialize content
+        let initialContent = '';
+
+        // Check if the URL has a "content" parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('content')) {
+            // Decode the content from the URL
+            initialContent = decodeURIComponent(urlParams.get('content'));
+        }
+
+        // Prepare the content to be displayed
+        let displayedContent = '<br><br><br><br><br><br>' + // Adds two line breaks
+            '<br>' + // Adds a single line break
+            '<br>' + // Another line break for additional spacing
+            escapeHtml(initialContent).replace(/\n/g, '<br>') + // Replace newlines with <br>
+            '<br><br><br><br><br><br><br><br>' + // Adds two line breaks
+            '<br>' + // Adds a single line break
+            '<br>'; // Another line break for additional spacing
+
+        // Set the inner HTML of the content div
+        document.getElementById('content').innerHTML = displayedContent;
+
+
+        // JavaScript for teleprompter functionality
+        const content = document.getElementById("content");
+        let scrollSpeed = 2; // Initial speed
+        let scrolling = false;
+        let scrollInterval;
+        let fontSize = 24; // Initial font size in pixels
+        const manualScrollAmount = 50; // Amount to scroll up/down on arrow keys
+        let editingMode = false; // Track editing mode
+        let isLyricsBackground = false; // Track if the background is lyricsBg.png
+
+        // Update max width in real-time using the slider
+        const maxWidthSlider = document.getElementById("maxWidthSlider");
+        const maxWidthValue = document.getElementById("maxWidthValue");
+
+        maxWidthSlider.addEventListener("input", () => {
+            const newWidth = maxWidthSlider.value;
+            document.getElementById("content").style.maxWidth = newWidth + "px";
+            maxWidthValue.textContent = newWidth; // Update displayed value
+        });
+
+
+        // Start scrolling
+        function startScrolling() {
+            if (!scrolling) {
+                scrolling = true;
+                scrollInterval = setInterval(() => {
+                    content.scrollBy(0, scrollSpeed); // Scroll the content instead of window
+                }, 50);
+            }
+        }
+
+        // Stop scrolling
+        function stopScrolling() {
+            clearInterval(scrollInterval);
+            scrolling = false;
+        }
+
+        // Toggle scrolling with space bar
+        function toggleScrolling() {
+            if (scrolling) {
+                stopScrolling();
+            } else {
+                startScrolling();
+            }
+        }
+
+        // Set scroll speed without stopping the scroll
+        function setScrollSpeed(speed) {
+            scrollSpeed = speed;
+        }
+
+        // Apply Font Settings Function
+        function applyFontSettings() {
+            const maxWidth = document.getElementById("maxWidthSlider").value;
+            const fontWeight = document.getElementById("fontWeight").value;
+            const fontStyle = document.getElementById("fontStyle").value;
+
+            // Set the content's max width, font weight, and font style
+            const content = document.getElementById("content");
+            content.style.maxWidth = maxWidth + "px";
+            content.style.fontWeight = fontWeight;
+            content.style.fontStyle = fontStyle;
+
+            // Close the font modal
+            closeFontModal();
+        }
+
+        // Zoom out
+        function zoomOut() {
+            const currentScroll = content.scrollTop; // Get the current scroll position
+            if (fontSize > 10) { // Prevent zooming out too much
+                fontSize -= 2;
+                content.style.fontSize = fontSize + "px";
+                content.scrollTop = currentScroll; // Set the scroll position back to the previous position
+            }
+        }
+
+        // Zoom out
+        function zoomIn() {
+            const currentScroll = content.scrollTop; // Get the current scroll position
+            fontSize += 2;
+            content.style.fontSize = fontSize + "px";
+            content.scrollTop = currentScroll; // Set the scroll position back to the previous position
+        }
+
+        // Scroll to the top
+        function scrollToTop() {
+            content.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        // Manual scroll up
+        function manualScrollUp() {
+            content.scrollBy(0, -manualScrollAmount);
+        }
+
+        // Manual scroll down
+        function manualScrollDown() {
+            content.scrollBy(0, manualScrollAmount);
+        }
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            editingMode = !editingMode; // Toggle editing mode
+            content.contentEditable = editingMode; // Set contenteditable attribute
+            if (editingMode) {
+                content.focus(); // Focus the content if entering edit mode
+                content.style.border = "2px solid white"; // Add white border
+            } else {
+                content.style.border = "none"; // Remove border
+            }
+            updateFontColor(); // Update font color based on background
+        }
+
+        // Update font color and family based on background
+        function updateFontColor() {
+            if (isLyricsBackground) {
+                content.style.color = "black"; // Black font for lyrics background
+                content.style.fontFamily = "Times New Roman"; // Change font for lyrics background
+                content.style.fontWeight = "bolder";
+            } else {
+                content.style.color = "white"; // White font for black background
+                content.style.fontFamily = "Arial, sans-serif"; // Default font
+            }
+        }
+
+        // Change font color of selected text
+        function changeFontColor(color) {
+            document.execCommand('foreColor', false, color);
+        }
+
+        // Change background image
+        function changeBackground() {
+            isLyricsBackground = !isLyricsBackground; // Toggle background image state
+            document.body.classList.toggle('bg-image'); // Toggle background image class
+            updateFontColor();
+        }
+
+        // Reset all font colors to default for current background
+        function resetFontColor() {
+            const spans = content.querySelectorAll("span[style]");
+            spans.forEach(span => {
+                span.style.color = ""; // Clear any inline color style
+            });
+            updateFontColor(); // Apply default color based on background
+        }
+        // Modal functionality
+        function openModal() {
+            document.getElementById("myModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+        }
+
+        // Open and Close Modal Functions
+        function openFontModal() {
+            document.getElementById("fontModal").style.display = "block";
+        }
+
+        function closeFontModal() {
+            document.getElementById("fontModal").style.display = "none";
+        }
+
+        // Keydown event listener for modal and zoom
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "s" || e.key === "S") {
+                openFontModal();
+            }
+            if (e.key === "[") {
+                zoomOut();
+            }
+            if (e.key === "]") {
+                zoomIn();
+            }
+        });
+
+
+
+        // Keydown event listener
+        document.addEventListener("keydown", (e) => {
+
+            // Check if in editing mode
+            if (editingMode) {
+                // Allow Space bar, "S", and "s" keys to function normally in editing mode
+                if (e.key === "s" || e.key === "S" || e.code === "Space") {
+                    return; // Do nothing, let the character or space be entered
+                }
+            }
+
+            if (!editingMode && e.code === "Space") {
+                e.preventDefault();
+                toggleScrolling();
+            }
+            if (e.key >= "1" && e.key <= "9") { // Keys 1-9 to set scroll speed
+                setScrollSpeed(parseInt(e.key));
+            }
+            if (e.key === "[") { // Zoom out
+                zoomOut();
+            }
+            if (e.key === "]") { // Zoom in
+                zoomIn();
+            }
+            if (e.code === "Escape") { // Escape key to go to the top
+                scrollToTop();
+            }
+            if (e.code === "ArrowUp") { // Arrow up for manual scroll up
+                manualScrollUp();
+            }
+            if (e.code === "ArrowDown") { // Arrow down for manual scroll down
+                manualScrollDown();
+            }
+            if (e.code === "F2") { // F2 to toggle edit mode
+                e.preventDefault();
+                toggleEditMode();
+            }
+            if (e.ctrlKey && (e.key === "b" || e.key === "B")) { // Ctrl+B to bold
+                e.preventDefault();
+                if (content.contentEditable === "true") {
+                    document.execCommand('bold');
+                }
+            }
+            if (e.key === "1" && content.contentEditable === "true") {
+                e.preventDefault();
+                changeFontColor("white");
+            }
+
+            if (e.key === "2" && content.contentEditable === "true") {
+                e.preventDefault();
+                changeFontColor("black");
+            }
+
+            if (e.key === "3" && content.contentEditable === "true") {
+                e.preventDefault();
+                changeFontColor("yellow");
+            }
+            if (e.key === "4" && content.contentEditable === "true") {
+                e.preventDefault();
+                changeFontColor("violet");
+            }
+            if (e.key === "p") {
+                e.preventDefault();
+                if (content.contentEditable === "true") {
+                    changeFontColor("black");
+                }
+                changeBackground(); // Toggle background and reset colors
+            }
+
+            if (e.code === "Tab") { // Tab key to open the modal
+                e.preventDefault(); // Prevent default tab behavior
+                openModal(); // Open the modal
+            }
+        });
+
+        // Close the modal when clicking outside of it
+        window.onclick = function (event) {
+            if (event.target == document.getElementById("myModal")) {
+                closeModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target == document.getElementById("fontModal")) {
+                closeFontModal();
+            }
+        }
+    </script>
+</body>
+
+</html>
