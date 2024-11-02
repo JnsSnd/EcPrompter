@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 break;
             case 'KeyP':
                 event.preventDefault();
-                if {isBlackAndWhite} localStorage.setItem('prompterType', 'LYRICS_PROMPTER');
+                if (isBlackAndWhite) localStorage.setItem('prompterType', 'LYRICS_PROMPTER');
                 else localStorage.setItem('prompterType', 'BLACK_AND_WHITE');
                 prompterContainer.classList.toggle('lyricsPrompter');
                 prompterContainer.classList.toggle('blackwhite');
