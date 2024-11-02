@@ -1,53 +1,20 @@
 document.addEventListener('contextmenu', event => event.preventDefault());
 
 function requestFullscreen() {
-
     const body = document.documentElement;
 
-
-    if (body.requestFullscreen) {
-
-        body.requestFullscreen();
-
-    } else if (body.webkitRequestFullscreen) {
-
-        body.webkitRequestFullscreen();
-
-    } else if (body.mozRequestFullscreen) {
-
-        body.mozRequestFullscreen();
-
-    }
-
+    if (body.requestFullscreen) body.requestFullscreen();
+    else if (body.webkitRequestFullscreen) body.webkitRequestFullscreen();
+    else if (body.mozRequestFullscreen) body.mozRequestFullscreen();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-
     const prompterContainer = document.getElementById("bgPrompter");
-
     const prompterContent = document.getElementById("prompter-content");
 
+    if (window.name === 'receiverWindow') window.focus();
+    else window.name = 'receiverWindow';
 
-    if (window.name === 'receiverWindow') {
-
-        // If the window is already created, just focus on it
-
-        window.focus();
-
-
-    } else {
-
-        // If the window is not already created, assign a unique identifier
-
-        window.name = 'receiverWindow';
-    }
-
-
-    //Check Prompter Type
-
-
-
-    // Retrieve the form data from localStorage
 
     var prompterType = localStorage.getItem('prompterType');
     if(prompterType === 'LYRICS_PROMPTER') {
@@ -57,9 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
         prompterContainer.classList.remove('lyricsPrompter');
         prompterContainer.classList.add('blackwhite');
     }
-    
-    
-    // Display the received data
     
     var receivedData = localStorage.getItem('formData');
     prompterContent.innerHTML = receivedData;
@@ -79,11 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
         var fontSize = sessionStorage.getItem('fontSize');
         prompterContent.style.fontSize = fontSize + 'px';
 
-    } else {
-        prompterContent.style.fontSize = '100px';
-    }
-
-
-
+    } else prompterContent.style.fontSize = '100px';
+    
 });
-
