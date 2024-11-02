@@ -55,7 +55,7 @@ body {
 }
 
 #bgPrompter.lyricsPrompter {
-    background-image: url('lyrics_bg.png');
+    background-image: url('lyricsBg.png');
 
     background-repeat: no-repeat;
 
@@ -133,7 +133,7 @@ body {
 
 #bgPrompterImage {
 
-    background-image: url('lyrics_bg.png');
+    background-image: url('lyricsBg.png');
 
     background-repeat: no-repeat;
 
