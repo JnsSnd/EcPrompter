@@ -5,7 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let scrollingNow = false;
     let animationLoop;
     let fontSize;
-    let isBlackAndWhite = true;
+
+    // Set the initial default theme
+    //LYRICS_PROMPTER for bg, any string for B&W
+    localStorage.setItem('prompterType', 'ANYTHING_ELSE');
 
     // Set the initial position of the prompter content
     let scrollPosition = 0;
@@ -37,10 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getFontSize() {
-        // Get the computed style of the element
         var computedStyle = window.getComputedStyle(prompterContent);
-        
-        // Get the font size property from the computed style
         fontSize = computedStyle.getPropertyValue('font-size');
     }
 
@@ -124,9 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 break;
             case 'F11': case 'KeyF':
                 event.preventDefault();
-                // Toggle fullscreen when 'F' key is pressed
                 toggleFullscreen();
-                // Toggle the visibility of the element
                 toggleElementVisibility();
                 break;
             case 'BracketLeft':
@@ -145,9 +143,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 break;
             case 'KeyP':
                 event.preventDefault();
-                if (isBlackAndWhite) localStorage.setItem('prompterType', 'BLACK_AND_WHITE');
-                else localStorage.setItem('prompterType', 'LYRICS_PROMPTER');
-                isBlackAndWhite = !isBlackAndWhite;
                 prompterContainer.classList.toggle('lyricsPrompter');
                 prompterContainer.classList.toggle('blackwhite');
                 break;
@@ -172,11 +167,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.removeEventListener('keydown', keydownListener);
     }
 
-
     //Keyboard Shortcuts
     var helpCard = document.getElementById("helpCard");
-
-    // When the Tab key is pressed, show the modal
     window.addEventListener('keydown', function (event) {
         if (event.key === 'Tab') {
             helpCard.style.display = "block";
@@ -193,31 +185,66 @@ document.addEventListener("DOMContentLoaded", function () {
             prompterContent.focus();
 
             event.preventDefault();
-        } else if (event.code === 'PageUp') {
+        } else if (event.code === 'PageUp' && prompterContent.contentEditable === "true") {
             showColorPicker();
+            event.preventDefault();
+        } else if (event.code === 'PageDown' && prompterContent.contentEditable === "true") {
+            showColorPresets();
             event.preventDefault();
         }
     });
 
-    // When the Tab key is released, hide the modal
     window.addEventListener('keyup', function (event) {
         if (event.key === 'Tab') {
             helpCard.style.display = "none";
         }
     });
 
-    //set COlor
     function showColorPicker() {
         var colorPicker = document.createElement('input');
         colorPicker.type = 'color';
-        colorPicker.addEventListener('change', function () {
-            setColor(colorPicker.value);
+        colorPicker.addEventListener('change', function (){setColor(colorPicker.value);});
+        colorPicker.click(); 
+    }
+
+    function showColorPresets() {
+        if (document.getElementById("colorPickerPopup")) return;
+    
+        const colorPickerPopup = document.createElement("div");
+        colorPickerPopup.id = "colorPickerPopup";
+    
+        //Add your colors here
+        const colors = ["#ffffff", "#000000", "#ffff00", "#ff00ff", "#ff0000"];
+        colors.forEach(color => {
+            const colorButton = document.createElement("button");
+            colorButton.style.backgroundColor = color;
+            colorButton.classList.add("colorButton");
+            colorButton.onclick = () => {
+                setColor(color);
+                closeColorPresets();
+            };
+            colorPickerPopup.appendChild(colorButton);
         });
-        colorPicker.click(); // Open color picker dialog
+    
+        document.body.appendChild(colorPickerPopup);
+    
+        document.addEventListener("click", function handleOutsideClick(event) {
+            if (!colorPickerPopup.contains(event.target)) {
+                closeColorPresets();
+                document.removeEventListener("click", handleOutsideClick);
+            }
+        });
+    }
+    
+    function closeColorPresets() {
+        const colorPickerPopup = document.getElementById("colorPickerPopup");
+        if (colorPickerPopup) document.body.removeChild(colorPickerPopup);
     }
 
     function setColor(color) {
         document.execCommand('styleWithCSS', false, true);
         document.execCommand('foreColor', false, color);
+        if (window.getSelection) window.getSelection().removeAllRanges();
+        else if (document.selection) document.selection.empty();
     }
 });
