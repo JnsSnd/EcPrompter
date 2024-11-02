@@ -337,10 +337,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem('prompterType', 'LYRICS_PROMPTER');
 
                 break;
-
-            case 'KeyS':
-                openFontModal();
-                break;
         }
     };
 
@@ -389,19 +385,6 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
         }
     });
-
-        window.onclick = function (event) {
-            if (event.target == document.getElementById("myModal")) {
-                closeModal();
-            }
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function (event) {
-            if (event.target == document.getElementById("fontModal")) {
-                closeFontModal();
-            }
-        }
 
     // When the Tab key is released, hide the modal
     window.addEventListener('keyup', function (event) {
