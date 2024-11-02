@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 break;
 
-
+            
 
             case 'KeyF':
 
@@ -338,9 +338,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 break;
 
-
+            case 'KeyS':
+                openFontModal();
+                break;
         }
     };
+
+    function openFontModal() {
+        document.getElementById("fontModal").style.display = "block";
+    }
+
+    function closeFontModal() {
+        document.getElementById("fontModal").style.display = "none";
+    }
 
     notEditable();
     function notEditable() {
@@ -379,6 +389,19 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
         }
     });
+
+        window.onclick = function (event) {
+            if (event.target == document.getElementById("myModal")) {
+                closeModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target == document.getElementById("fontModal")) {
+                closeFontModal();
+            }
+        }
 
     // When the Tab key is released, hide the modal
     window.addEventListener('keyup', function (event) {
