@@ -10,14 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
     //LYRICS_PROMPTER for bg, any string for B&W
     localStorage.setItem('prompterType', 'ANYTHING_ELSE');
 
-    // Set the initial position of the prompter content
     let scrollPosition = 0;
     prompterContent.style.top = scrollPosition + "px";
-
-    // Set the speed of auto-scrolling (adjust as needed)
     let scrollSpeed = 0.5;
 
-    // Function to handle auto-scrolling
     function scrollScript() {
         scrollPosition -= scrollSpeed;
         prompterContent.style.top = scrollPosition + "px";
@@ -146,16 +142,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 prompterContainer.classList.toggle('lyricsPrompter');
                 prompterContainer.classList.toggle('blackwhite');
                 break;
+            case 'Minus':
+                event.preventDefault();
+                decreasePadding();
+                break;
+            case 'Equal':
+                event.preventDefault();
+                increasePadding();
+                break;
         }
     };
 
-    function openFontModal() {
-        document.getElementById("fontModal").style.display = "block";
+    //Padding
+    //Constants should be temporary, make it adjust to the resolution of the user's screen
+    const minWidth = 800;
+    function decreasePadding() {
+        let currentWidth = parseInt(window.getComputedStyle(prompterContent).width, 10);
+        if (currentWidth - 50 >= minWidth) prompterContent.style.width = (currentWidth - 50) + "px";
     }
 
-    function closeFontModal() {
-        document.getElementById("fontModal").style.display = "none";
+    const maxWidth = 2000;
+    function increasePadding() {
+        let currentWidth = parseInt(window.getComputedStyle(prompterContent).width, 10);
+        if (currentWidth + 50 <= maxWidth) prompterContent.style.width = (currentWidth + 50) + "px";
     }
+
 
     notEditable();
     function notEditable() {
@@ -200,6 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Colors
     function showColorPicker() {
         var colorPicker = document.createElement('input');
         colorPicker.type = 'color';
