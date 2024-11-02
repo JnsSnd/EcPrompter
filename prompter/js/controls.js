@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 event.preventDefault();
                 if (isBlackAndWhite) localStorage.setItem('prompterType', 'BLACK_AND_WHITE');
                 else localStorage.setItem('prompterType', 'LYRICS_PROMPTER');
+                isBlackAndWhite = !isBlackAndWhite;
                 prompterContainer.classList.toggle('lyricsPrompter');
                 prompterContainer.classList.toggle('blackwhite');
                 break;
