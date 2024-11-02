@@ -160,15 +160,12 @@ function addNewSet(tabIndex) {
 
 // Function to open or update prompt window
 function handlePrompt(button) {
-    const textAreaContent = button.previousElementSibling.value;
-    const encodedContent = encodeURIComponent(textAreaContent);
+    let textareaValue = "<br>";
+    textareaValue += button.previousElementSibling.value; 
+    localStorage.setItem('formData', textareaValue);
 
-    if (currentWindow && !currentWindow.closed) {
-        currentWindow.location.href = `view.html?content=${encodedContent}`;
-    } else {
-        currentWindow = window.open(`view.html?content=${encodedContent}`, '_blank', 'width=800,height=600');
-        currentWindow.focus();
-    }
+    currentWindow = window.open('prompter/content.html', 'receiverWindow', 'width=800,height=600');
+    currentWindow.focus();
 
     updateButtonColors(button);
 }
