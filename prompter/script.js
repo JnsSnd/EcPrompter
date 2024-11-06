@@ -1,17 +1,23 @@
+document.addEventListener('contextmenu', event => event.preventDefault());
+
 document.addEventListener("DOMContentLoaded", function () {
     const prompterContainer = document.getElementById("bgPrompter");
     const prompterContent = document.getElementById("prompter-content");
-    const playPauseKey = 'Space';
+
+    //Font size
+    let fontSize = sessionStorage.getItem('fontSize');
+    if (fontSize) prompterContent.style.fontSize = fontSize + 'px';
+    else prompterContent.style.fontSize = '100px';
+
+    //Get data
+    let receivedData = "<br>" + localStorage.getItem('formData');
+    prompterContent.innerHTML = receivedData;
+
+    //Scrolling
+    prompterContent.style.top = "0px";
     let scrollingNow = false;
     let animationLoop;
-    let fontSize;
-
-    // Set the initial default theme
-    //LYRICS_PROMPTER for bg, any string for B&W
-    localStorage.setItem('prompterType', 'ANYTHING_ELSE');
-
     let scrollPosition = 0;
-    prompterContent.style.top = scrollPosition + "px";
     let scrollSpeed = 0.5;
 
     function scrollScript() {
@@ -35,11 +41,16 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollingNow = false;
     }
 
-    function getFontSize() {
-        var computedStyle = window.getComputedStyle(prompterContent);
-        fontSize = computedStyle.getPropertyValue('font-size');
+    //Initial theme
+    if (sessionStorage.getItem('prompterType') === 'LYRICS_PROMPTER') {
+        prompterContainer.classList.add('lyricsPrompter');
+        prompterContainer.classList.remove('blackwhite');
+    } else {
+        prompterContainer.classList.remove('lyricsPrompter');
+        prompterContainer.classList.add('blackwhite');
     }
 
+    //Full Screen
     function toggleFullscreen() {
         if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullscreenElement) exitFullscreen();
         else requestFullscreen();
@@ -61,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var keydownListener = function (event) {
         switch (event.code) {
-            case playPauseKey:
+            case 'Space':
                 event.preventDefault();
                 playPauseScroll();
                 break;
@@ -101,16 +112,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 event.preventDefault();
                 pauseScroll();
                 break;
+            case 'KeyP':
+                event.preventDefault();
+                if (sessionStorage.getItem('prompterType') === 'LYRICS_PROMPTER') sessionStorage.setItem('prompterType', 'BLACK_AND_WHITE');
+                else sessionStorage.setItem('prompterType', 'LYRICS_PROMPTER');
+                prompterContainer.classList.toggle('lyricsPrompter');
+                prompterContainer.classList.toggle('blackwhite');
+                break;
             case 'ArrowUp':
                 event.preventDefault();
                 pauseScroll();
-                if (prompterContent.offsetTop >= 0) {
-                    scrollPosition = 0;
-                    prompterContent.style.top = "0px";
-                } else {
-                    scrollPosition += 50;
-                    prompterContent.style.top = scrollPosition + "px";
-                }
+                scrollPosition = prompterContent.offsetTop > -50? 0 : scrollPosition + 50;
+                prompterContent.style.top = scrollPosition + "px";
                 break;
             case 'ArrowDown':
                 event.preventDefault();
@@ -123,52 +136,42 @@ document.addEventListener("DOMContentLoaded", function () {
                 toggleFullscreen();
                 toggleElementVisibility();
                 break;
+            case 'Escape':
+                event.preventDefault();
+                exitFullscreen();
+                break;
             case 'BracketLeft':
                 event.preventDefault();
-                var currentSize = window.getComputedStyle(prompterContent).fontSize;
-                var newSize = parseInt(currentSize) - 2;
+                var newSize = parseInt(window.getComputedStyle(prompterContent).fontSize) - 2;
                 prompterContent.style.fontSize = newSize + 'px';
                 sessionStorage.setItem('fontSize', newSize);
                 break;
             case 'BracketRight':
                 event.preventDefault();
-                var currentSize = window.getComputedStyle(prompterContent).fontSize;
-                var newSize = parseInt(currentSize) + 2;
+                var newSize = parseInt(window.getComputedStyle(prompterContent).fontSize) + 2;
                 prompterContent.style.fontSize = newSize + 'px';
                 sessionStorage.setItem('fontSize', newSize);
                 break;
-            case 'KeyP':
-                event.preventDefault();
-                prompterContainer.classList.toggle('lyricsPrompter');
-                prompterContainer.classList.toggle('blackwhite');
-                break;
             case 'Minus':
                 event.preventDefault();
-                decreasePadding();
+                var currentWidth = parseInt(window.getComputedStyle(prompterContent).width, 10);
+                if (currentWidth - 50 >= screen.availWidth/3) prompterContent.style.width = (currentWidth - 50) + "px";
                 break;
             case 'Equal':
                 event.preventDefault();
-                increasePadding();
+                var currentWidth = parseInt(window.getComputedStyle(prompterContent).width, 10);
+                if (currentWidth + 50 <= screen.availWidth) prompterContent.style.width = (currentWidth + 50) + "px";
+                break;
+            case 'KeyT':
+                event.preventDefault();
+                if (scrollingNow) break;
+                scrollPosition = 0;
+                prompterContent.style.top = "0px";
                 break;
         }
     };
 
-    //Padding
-    //Constants should be temporary, make it adjust to the resolution of the user's screen
-    const minWidth = 800;
-    function decreasePadding() {
-        let currentWidth = parseInt(window.getComputedStyle(prompterContent).width, 10);
-        if (currentWidth - 50 >= minWidth) prompterContent.style.width = (currentWidth - 50) + "px";
-    }
-
-    const maxWidth = 2000;
-    function increasePadding() {
-        let currentWidth = parseInt(window.getComputedStyle(prompterContent).width, 10);
-        if (currentWidth + 50 <= maxWidth) prompterContent.style.width = (currentWidth + 50) + "px";
-    }
-
-
-    notEditable();
+    //Text edit states
     function notEditable() {
         document.addEventListener('keydown', keydownListener);
     }
@@ -177,6 +180,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('search-modal');
         document.removeEventListener('keydown', keydownListener);
     }
+
+    notEditable();
 
     //Keyboard Shortcuts
     var helpCard = document.getElementById("helpCard");
@@ -254,6 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function setColor(color) {
+        //Deprecated methods, check
         document.execCommand('styleWithCSS', false, true);
         document.execCommand('foreColor', false, color);
         if (window.getSelection) window.getSelection().removeAllRanges();

@@ -22,9 +22,7 @@ body {
 }
 
 .text_area::placeholder {
-
     color: #777;
-
 }
 
 .prompterCon {

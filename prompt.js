@@ -160,9 +160,7 @@ function addNewSet(tabIndex) {
 
 // Function to open or update prompt window
 function handlePrompt(button) {
-    let textareaValue = "<br>";
-    textareaValue += button.previousElementSibling.value; 
-    localStorage.setItem('formData', textareaValue);
+    localStorage.setItem('formData', button.previousElementSibling.value);
 
     currentWindow = window.open('prompter/content.html', 'receiverWindow', 'width=800,height=600');
     currentWindow.focus();
