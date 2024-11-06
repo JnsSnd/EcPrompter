@@ -210,6 +210,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Scroll Wheel
+    var wheelListener = function(event) {
+        event.preventDefault();
+        
+        if (event.ctrlKey){
+            if (event.deltaY < 0) {
+                var newSize = parseInt(window.getComputedStyle(prompterContent).fontSize) + 2;
+                prompterContent.style.fontSize = newSize + 'px';
+                sessionStorage.setItem('fontSize', newSize);
+            } else {
+                var newSize = parseInt(window.getComputedStyle(prompterContent).fontSize) - 2;
+                prompterContent.style.fontSize = newSize + 'px';
+                sessionStorage.setItem('fontSize', newSize);
+            }
+        } else { //Unsure whether to enable when non editable, also the amount
+            pauseScroll();
+            if (event.deltaY < 0) scrollPosition = prompterContent.offsetTop > -100? 0 : scrollPosition + 100;
+            else scrollPosition -= 100;
+            prompterContent.style.top = scrollPosition + "px";
+        }
+    };
+    
+    // Add the wheel event listener to the container or document
+    document.addEventListener('wheel', wheelListener);
+
     window.addEventListener('keyup', function (event) {
         if (event.key === 'Tab') {
             helpCard.style.display = "none";
