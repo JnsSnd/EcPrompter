@@ -210,6 +210,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    window.addEventListener('keyup', function (event) {
+        if (event.key === 'Tab') {
+            helpCard.style.display = "none";
+        }
+    });
+
     //Scroll Wheel
     var wheelListener = function(event) {
         event.preventDefault();
@@ -231,15 +237,8 @@ document.addEventListener("DOMContentLoaded", function () {
             prompterContent.style.top = scrollPosition + "px";
         }
     };
-    
-    // Add the wheel event listener to the container or document
-    document.addEventListener('wheel', wheelListener);
 
-    window.addEventListener('keyup', function (event) {
-        if (event.key === 'Tab') {
-            helpCard.style.display = "none";
-        }
-    });
+    document.addEventListener('wheel', wheelListener);
 
     //Colors
     function showColorPicker() {
@@ -256,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
         colorPickerPopup.id = "colorPickerPopup";
     
         //Add your colors here
-        const colors = ["#ffffff", "#000000", "#ffff00", "#ff00ff", "#ff0000"];
+        const colors = ["#ffffff", "#000000", "#ffff00", "#ff00ff", "#ff0000", "#0000FF", "#9D00FF"];
         colors.forEach(color => {
             const colorButton = document.createElement("button");
             colorButton.style.backgroundColor = color;
