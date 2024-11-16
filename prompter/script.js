@@ -216,6 +216,30 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Scroll Wheel
+    var wheelListener = function(event) {
+        event.preventDefault();
+        
+        if (event.ctrlKey){
+            if (event.deltaY < 0) {
+                var newSize = parseInt(window.getComputedStyle(prompterContent).fontSize) + 2;
+                prompterContent.style.fontSize = newSize + 'px';
+                sessionStorage.setItem('fontSize', newSize);
+            } else {
+                var newSize = parseInt(window.getComputedStyle(prompterContent).fontSize) - 2;
+                prompterContent.style.fontSize = newSize + 'px';
+                sessionStorage.setItem('fontSize', newSize);
+            }
+        } else { //Unsure whether to enable when non editable, also the amount
+            pauseScroll();
+            if (event.deltaY < 0) scrollPosition = prompterContent.offsetTop > -100? 0 : scrollPosition + 100;
+            else scrollPosition -= 100;
+            prompterContent.style.top = scrollPosition + "px";
+        }
+    };
+
+    document.addEventListener('wheel', wheelListener);
+
     //Colors
     function showColorPicker() {
         var colorPicker = document.createElement('input');
@@ -231,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
         colorPickerPopup.id = "colorPickerPopup";
     
         //Add your colors here
-        const colors = ["#ffffff", "#000000", "#ffff00", "#ff00ff", "#ff0000"];
+        const colors = ["#ffffff", "#000000", "#ffff00", "#ff00ff", "#ff0000", "#0000FF", "#9D00FF"];
         colors.forEach(color => {
             const colorButton = document.createElement("button");
             colorButton.style.backgroundColor = color;
